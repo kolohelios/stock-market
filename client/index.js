@@ -3,19 +3,19 @@
 
 $(document).ready(init);
 
-var root, acctName, cashBal ;
+var root, acctName, cashBal, portfolios;
 
 function init(){
   root = new Firebase('https://stk-kolohelios.firebaseio.com/');
   acctName = root.child('name');
   cashBal = root.child('cash');
-  //portfolios = root.child('portfolios');
+  portfolios = root.child('portfolios');
   $('#update').click(createAccount);
   $('#create-portfolio').click(createPortfolio);
   acctName.on('value', updateName);
   cashBal.on('value', updateCashBal);
-  //portfolios.on('child_added', addPortfolio);
-  //$('#buy').on('click', getQuote);
+  portfolios.on('child_added', addPortfolio);
+  $('#buy').on('click', getQuote);
 }
 
 function createAccount(){
@@ -25,7 +25,6 @@ function createAccount(){
   acctName.set(name);
   var value = $('#balance-input').val();
   cashBal.set(value);
-  portfolios.set('');
 }
 
 function updateName(snapshot){
@@ -39,62 +38,80 @@ function updateCashBal(snapshot){
 }
 
 function createPortfolio(){
-  var portfolios = root.child('portfolios');
-  var portfolioToAdd = $('#portfolio-name').val();
-  portfolios.push(portfolioToAdd);
-
+  var portfolioName = $('#portfolio-name').val();
+  var portfolio = { name: portfolioName };
+  portfolios.push(portfolio);
 }
 
 function addPortfolio(snapshot){
   var newPortfolio = snapshot.val();
+  var newPortfolioName = newPortfolio.name;
   var key = snapshot.key();
   var $option = $('<option>');
-  $option.text(newPortfolio);
+  $option.text(newPortfolioName);
   $('#portfolio-list').append($option);
   var $div = $('<div>');
-  $div.text(newPortfolio).addClass(newPortfolio);
+  $div.text(newPortfolioName).addClass(newPortfolioName);
   $div.attr('data-key', key);
   $('#portfolios').append($div);
+  for(var i in newPortfolio){
+    if(typeof newPortfolio[i] === 'object'){
+      var $ul = $('<ul>');
+      var stockString = [];
+        for(var j in newPortfolio[i]){
+          var $li = $('<li>');
+          $li.text(j + ' : ' + newPortfolio[i][j]);
+          $ul.append($li);
+        }
+        console.log(newPortfolioName);
+        $('.' + newPortfolioName).append($ul);
+        console.log(stockString);
+      }
+  }
 }
-//
-// function getQuote(){
-//   var symbol = $('#symbol').val().toUpperCase();
-//   $.getJSON('http://dev.markitondemand.com/Api/v2/Quote/jsonp?symbol=' + symbol + '&callback=?', function(response){
-//     buyStock(response.LastPrice, symbol);
-//   });
-// }
-//
-// function buyStock(price, symbol){
-//   var quantity = $('#num-shares').val();
-//   var totalAmount = quantity * price;
-//   var cashBalance = $('#dispcash').text() * 1;
-//   console.log(totalAmount);
-//   if(totalAmount < cashBalance){
-//     updateFunds(cashBalance, totalAmount);
-//     addStockToPortfolio(symbol, quantity, totalAmount);
-//   }
-// }
-//
-// function updateFunds(cash, purchaseAmount){
-//   var newCash = cash - purchaseAmount;
-//   cashBal.set(newCash);
-// }
-//
-// function addStockToPortfolio(symbol, quantity, totalAmount){
-//   console.log('hey, you\'re typing jive');
-//   var selectedPortfolio = $('#portfolio-list').val();
-//
-//   var $domPortfolio  = $('#portfolios').find('div').attr('class', selectedPortfolio);
-//   var key = $domPortfolio.data('key');
-//
-//   console.log(key);
-//
-//   var stock = {
-//     symbol: symbol,
-//     quantity: quantity,
-//     totalAmount: totalAmount
-//   };
-//
-//   var portfolio = portfolios.(key);
-//   portfolio.push(stock);
-// }
+
+function getQuote(){
+  var symbol = $('#symbol').val().toUpperCase();
+  $.getJSON('http://dev.markitondemand.com/Api/v2/Quote/jsonp?symbol=' + symbol + '&callback=?', function(response){
+    buyStock(response.LastPrice, symbol);
+  });
+}
+
+function buyStock(price, symbol){
+  var quantity = $('#num-shares').val() * 1;
+  var totalAmount = quantity * price;
+  var cashBalance = $('#dispcash').text() * 1;
+  if(totalAmount < cashBalance){
+    updateFunds(cashBalance, totalAmount);
+    addStockToPortfolio(symbol, quantity, totalAmount);
+  }
+}
+
+function updateFunds(cash, purchaseAmount){
+  var newCash = cash - purchaseAmount;
+  cashBal.set(newCash);
+}
+
+function addStockToPortfolio(symbol, quantity, totalAmount){
+  console.log(totalAmount, symbol, quantity);
+  var selectedPortfolio = $('#portfolio-list').val();
+  var $domPortfolio  = $('.' + selectedPortfolio);
+  console.log($domPortfolio);
+  var key = $domPortfolio.data('key');
+  console.log($domPortfolio);
+  console.log(key);
+  var stock = {
+    symbol: symbol,
+    quantity: quantity,
+    totalAmount: totalAmount
+  };
+  var portfolio = portfolios.child(key);
+  portfolio.push(stock);
+}
+
+function totalOfPortfolio(){
+  console.log(portfolios);
+  portfolios.forEach(function(p){
+    console.log(p);
+  });
+}
