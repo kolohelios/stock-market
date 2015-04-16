@@ -16,20 +16,13 @@ function init(){
   cashBal.on('value', updateCashBal);
   portfolios.on('child_added', addPortfolio);
   $('#buy').on('click', getQuote);
-}
 
-function createAccount(){
-  if($('#dispname').text() !== ''){
-    $('#name #name-input').addClass('hidden');
-  }
-  if($('#dispcash').text() !== ''){
-    $('#balance #balance-input').addClass('hidden');
-  }
   if(($('#dispname').text() !== '') && ($('#dispcash').text() !== '')){
     $('#update').addClass('hidden');
   }
-  $('#personal-info').hide();
-  $('#headdisplay').show();
+}
+
+function createAccount(){
   var name = $('#name-input').val();
   acctName.set(name);
   var value = $('#balance-input').val();
@@ -39,11 +32,23 @@ function createAccount(){
 function updateName(snapshot){
   var name = snapshot.val();
   $('#dispname').text(name);
+  if($('#dispname').text() !== ''){
+    $('#name').addClass('hidden');
+  }
+  if(($('#dispname').text() !== '') && ($('#dispcash').text() !== '')){
+    $('#update').addClass('hidden');
+  }
 }
 
 function updateCashBal(snapshot){
   var cashBalance = snapshot.val();
   $('#dispcash').text(cashBalance);
+  if($('#dispcash').text() !== ''){
+    $('#balance').addClass('hidden');
+  }
+  if(($('#dispname').text() !== '') && ($('#dispcash').text() !== '')){
+    $('#update').addClass('hidden');
+  }
 }
 
 function createPortfolio(){
@@ -53,6 +58,7 @@ function createPortfolio(){
 }
 
 function addPortfolio(snapshot){
+  console.log('adding portfolio item');
   var newPortfolio = snapshot.val();
   var newPortfolioName = newPortfolio.name;
   var key = snapshot.key();
@@ -75,9 +81,7 @@ function addPortfolio(snapshot){
           $li.text(j + ' : ' + newPortfolio[i][j]);
           $ul.append($li);
         }
-        //console.log(newPortfolioName);
         $('.' + newPortfolioName).append($ul);
-        //console.log(stockString);
       }
   }
   totalOfPortfolios();
@@ -102,7 +106,7 @@ function buyStock(price, symbol){
 
 function updateFunds(cash, purchaseAmount){
   var newCash = cash - purchaseAmount;
-  cashBal.set(newCash);
+  cashBal.set(newCash.toFixed(2));
 }
 
 function addStockToPortfolio(symbol, quantity, totalAmount){
@@ -116,10 +120,11 @@ function addStockToPortfolio(symbol, quantity, totalAmount){
   var stock = {
     symbol: symbol,
     quantity: quantity,
-    totalAmount: totalAmount
+    totalAmount: totalAmount.toFixed(2)
   };
   var portfolio = portfolios.child(key);
   portfolio.push(stock);
+  location.reload();
 }
 
 function totalOfPortfolios(){
