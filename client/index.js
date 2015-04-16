@@ -51,7 +51,7 @@ function addPortfolio(snapshot){
   $option.text(newPortfolioName);
   $('#portfolio-list').append($option);
   var $div = $('<div>');
-  $div.text(newPortfolioName).addClass(newPortfolioName);
+  $div.text(newPortfolioName).addClass(newPortfolioName).addClass('portfolio');
   $div.attr('data-key', key);
   $('#portfolios').append($div);
   for(var i in newPortfolio){
@@ -63,9 +63,9 @@ function addPortfolio(snapshot){
           $li.text(j + ' : ' + newPortfolio[i][j]);
           $ul.append($li);
         }
-        console.log(newPortfolioName);
+        //console.log(newPortfolioName);
         $('.' + newPortfolioName).append($ul);
-        console.log(stockString);
+        //console.log(stockString);
       }
   }
 }
@@ -109,9 +109,16 @@ function addStockToPortfolio(symbol, quantity, totalAmount){
   portfolio.push(stock);
 }
 
-function totalOfPortfolio(){
-  console.log(portfolios);
-  portfolios.forEach(function(p){
-    console.log(p);
+function totalOfPortfolios(){
+  $('#portfolios').find('div').each(function(i, e){
+    console.log(e);
+    $('ul').each(function(j, f){
+
+    })
+
+
+
   });
+
+
 }
