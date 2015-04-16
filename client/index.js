@@ -19,6 +19,15 @@ function init(){
 }
 
 function createAccount(){
+  if($('#dispname').text() !== ''){
+    $('#name #name-input').addClass('hidden');
+  }
+  if($('#dispcash').text() !== ''){
+    $('#balance #balance-input').addClass('hidden');
+  }
+  if(($('#dispname').text() !== '') && ($('#dispcash').text() !== '')){
+    $('#update').addClass('hidden');
+  }
   $('#personal-info').hide();
   $('#headdisplay').show();
   var name = $('#name-input').val();
@@ -51,8 +60,11 @@ function addPortfolio(snapshot){
   $option.text(newPortfolioName);
   $('#portfolio-list').append($option);
   var $div = $('<div>');
+  var $span = $('<span>');
+  $span.addClass('portfoliototal');
   $div.text(newPortfolioName).addClass(newPortfolioName).addClass('portfolio');
   $div.attr('data-key', key);
+  $div.append($span);
   $('#portfolios').append($div);
   for(var i in newPortfolio){
     if(typeof newPortfolio[i] === 'object'){
@@ -68,6 +80,7 @@ function addPortfolio(snapshot){
         //console.log(stockString);
       }
   }
+  totalOfPortfolios();
 }
 
 function getQuote(){
@@ -110,15 +123,25 @@ function addStockToPortfolio(symbol, quantity, totalAmount){
 }
 
 function totalOfPortfolios(){
-  $('#portfolios').find('div').each(function(i, e){
-    console.log(e);
-    $('ul').each(function(j, f){
-
-    })
-
-
-
+  var totalForPortfolio = [];
+  $('.portfolio').each(function(i, e){
+    var total = 0;
+    $(this).find('ul').each(function(j, f){
+      $(this).find('li').each(function(k, g){
+        if(k === 2){
+          var listItem = $(this).text();
+          var array = listItem.split(' ');
+          total += parseFloat(array[2]);
+        }
+      });
+    });
+    totalForPortfolio.push(total);
+    $(this).find('span').text(total);
+    total = 0;
   });
 
-
+  var grandTotal = totalForPortfolio.reduce(function(prev, curr){
+    return prev + curr;
+  });
+  $('#total-num').text(grandTotal);
 }
